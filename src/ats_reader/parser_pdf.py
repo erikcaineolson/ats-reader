@@ -9,7 +9,9 @@ import pdfplumber
 from ats_reader.models import ExtractionMetadata
 
 
-def parse_pdf(path: Path) -> tuple[str, ExtractionMetadata]:
+def parse_pdf(
+    path: Path, *, max_pages: int = 20
+) -> tuple[str, ExtractionMetadata]:
     """Extract text and metadata from a PDF resume.
 
     Returns (raw_text, metadata).
@@ -24,8 +26,9 @@ def parse_pdf(path: Path) -> tuple[str, ExtractionMetadata]:
         meta.is_tagged_pdf = _check_tagged(pdf)
 
         fonts: set[str] = set()
+        pages_to_process = pdf.pages[:max_pages]
 
-        for page in pdf.pages:
+        for page in pages_to_process:
             # Text extraction (layout-aware)
             text = page.extract_text(layout=True) or ""
             pages_text.append(text)
