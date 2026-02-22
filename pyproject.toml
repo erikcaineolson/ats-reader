@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ats-reader"
+version = "0.1.0"
+description = "Simulate how an ATS parses your resume — see what it sees."
+requires-python = ">=3.10"
+dependencies = [
+    "pdfplumber>=0.10",
+    "python-docx>=1.0",
+    "click>=8.0",
+    "rich>=13.0",
+]
+
+[project.scripts]
+ats-reader = "ats_reader.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
