@@ -135,6 +135,7 @@ CLI (cli.py)
 - [python-docx](https://python-docx.readthedocs.io/) >= 1.0
 - [click](https://click.palletsprojects.com/) >= 8.0
 - [rich](https://rich.readthedocs.io/) >= 13.0
+- [defusedxml](https://github.com/tiran/defusedxml) >= 0.7
 
 ## License
 
