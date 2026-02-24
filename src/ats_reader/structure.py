@@ -9,6 +9,43 @@ from ats_reader.models import ExtractionMetadata, Severity, StructureFeedback
 from ats_reader.parser_docx import ParagraphStyle
 
 
+# Design tools whose PDFs lack semantic structure.
+# Matched case-insensitively against PDF Producer and Creator fields.
+_DESIGN_TOOL_KEYWORDS = [
+    "canva",
+    "figma",
+    "sketch",
+    "affinity",
+    "indesign",
+    "illustrator",
+    "photoshop",
+    "corel",
+    "visme",
+    "crello",
+    "piktochart",
+    "venngage",
+    "resume.io",
+    "flowcv",
+    "novoresume",
+    "zety",
+    "kickresume",
+    "enhancv",
+]
+
+
+def detect_design_tool(meta: ExtractionMetadata) -> str | None:
+    """Return the matched design-tool name, or None."""
+    combined = " ".join(
+        s for s in (meta.pdf_producer, meta.pdf_creator) if s
+    ).lower()
+    if not combined:
+        return None
+    for keyword in _DESIGN_TOOL_KEYWORDS:
+        if keyword in combined:
+            return keyword.title()
+    return None
+
+
 # ---------------------------------------------------------------------------
 # PDF structure analysis
 # ---------------------------------------------------------------------------
@@ -16,6 +53,31 @@ from ats_reader.parser_docx import ParagraphStyle
 def analyze_pdf_structure(meta: ExtractionMetadata) -> list[StructureFeedback]:
     """Produce structure feedback for a PDF document."""
     feedback: list[StructureFeedback] = []
+    tool = detect_design_tool(meta)
+
+    if tool:
+        feedback.append(
+            StructureFeedback(
+                severity=Severity.CRITICAL,
+                element="Design Tool Detected",
+                issue=(
+                    f"This PDF was created with {tool}. Design tools produce "
+                    "visually polished resumes but typically export flat, "
+                    "untagged PDFs with no semantic structure — ATS systems "
+                    "cannot reliably parse them."
+                ),
+                suggestion=(
+                    f"You have two options:\n"
+                    f"          1. Copy your resume content into a simple Word "
+                    f"or Google Docs template that uses Heading styles and "
+                    f"single-column layout, then export to PDF from there.\n"
+                    f"          2. If you want to keep your {tool} design for "
+                    f"networking or direct emails, also prepare a separate "
+                    f"plain-text-friendly version specifically for online "
+                    f"applications."
+                ),
+            )
+        )
 
     if meta.is_tagged_pdf is False:
         feedback.append(
@@ -28,9 +90,12 @@ def analyze_pdf_structure(meta: ExtractionMetadata) -> list[StructureFeedback]:
                     "which is unreliable."
                 ),
                 suggestion=(
-                    "Export from Word/Docs with 'Tagged PDF' enabled, or use "
-                    "Adobe Acrobat to add tags. A tagged PDF explicitly defines "
-                    "headings, lists, and reading order so the ATS doesn't have to guess."
+                    "In Word: File > Save As > PDF, then check 'Best for "
+                    "electronic distribution and accessibility' (Windows) or "
+                    "Options > 'Create tagged PDF' (Mac). In Google Docs: "
+                    "download as .docx first, then export to PDF from Word. "
+                    "Tags tell the ATS which text is a heading, list item, or "
+                    "paragraph — without them it has to guess from position alone."
                 ),
             )
         )

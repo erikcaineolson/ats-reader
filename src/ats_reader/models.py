@@ -62,6 +62,8 @@ class ExtractionMetadata:
     is_tagged_pdf: bool | None = None
     fonts_used: list[str] = field(default_factory=list)
     header_footer_text: list[str] = field(default_factory=list)
+    pdf_producer: str | None = None
+    pdf_creator: str | None = None
 
 
 @dataclass
@@ -69,6 +71,7 @@ class ATSWarning:
     severity: Severity
     message: str
     detail: str | None = None
+    fix: str | None = None
 
 
 @dataclass

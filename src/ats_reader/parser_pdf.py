@@ -25,6 +25,10 @@ def parse_pdf(
         # Check tagged PDF structure
         meta.is_tagged_pdf = _check_tagged(pdf)
 
+        # PDF producer/creator metadata
+        meta.pdf_producer = (pdf.metadata.get("Producer") or "").strip() or None
+        meta.pdf_creator = (pdf.metadata.get("Creator") or "").strip() or None
+
         fonts: set[str] = set()
         pages_to_process = pdf.pages[:max_pages]
 

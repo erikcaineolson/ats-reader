@@ -174,3 +174,5 @@ def _print_warnings(result: ATSResult) -> None:
         console.print(f"  [{style}][{label}][/{style}] {w.message}")
         if w.detail:
             console.print(f"          [dim]{w.detail}[/dim]")
+        if w.fix:
+            console.print(f"          [green]\u2192 {w.fix}[/green]")
